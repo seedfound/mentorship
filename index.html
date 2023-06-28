@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Information</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+  <script src="xlsx.full.min.js"></script>
+</head>
+<body>
+  <h1>St.John's College of Arts & Science, Ammandivilai</h1>
+  <h2>Mentors Selection Application</h2>
+  <h3>Powered by Seed Foundation</h3>
+  <form id="studentForm" action="/submit" method="POST">
+    <div>
+        <label for="departmentSelect">Department:</label>
+        <select id="departmentSelect"></select>
+        <p>
+
+        </p>
+    </div>
+
+    <div>
+      <label for="yearSelect">Year:</label>
+      <select id="yearSelect">
+        <option value="year1">Year 1</option>
+        <option value="year2">Year 2</option>
+        <option value="year3">Year 3</option>
+      </select>
+      <p>
+            
+      </p>
+    </div>
+
+    <div>
+      <label for="nameSelect">Name:</label>
+        <textarea id="nameSelect"></textarea>
+      </select>
+      <p>
+            
+      </p>
+    </div>
+
+    <div>
+    <div>
+      <label for="mentorSelect">Mentor:</label>
+      <select id="mentorSelect">
+        <option value="Amala Rose">Amala Rose</option>
+        <option value="Sam">Sam</option>
+        <option value="Nizon">Nixon</option>
+      </select>
+      <p>
+            
+      </p>
+
+    </div>
+
+    </div>
+
+    <div>
+      <label for="notesInput">Notes:</label>
+      <textarea id="notesInput"></textarea>
+    </div>
+    <p>
+            
+    </p>
+    <form id="studentForm" action="/submit" method="POST">
+
+        <input type="submit" value="Submit">
+    </form>
+  </form>
+
+  <script>
+    var csvFilePath = 'Dept.csv'; // Replace with your CSV file path
+
+    fetch(csvFilePath)
+      .then(response => response.text())
+      .then(data => {
+        var lines = data.split('\n');
+        var jsonData = [];
+
+        for (var i = 1; i < lines.length; i++) {
+          var line = lines[i].split(',');
+          var department = line[0].trim();
+
+          if (department) {
+            jsonData.push(department);
+          }
+        }
+
+        var departmentSelect = document.getElementById('departmentSelect');
+
+        // Clear existing options
+        departmentSelect.innerHTML = '';
+
+        // Populate department dropdown with data from CSV
+        for (var i = 0; i < jsonData.length; i++) {
+          var option = document.createElement('option');
+          option.value = jsonData[i];
+          option.text = jsonData[i];
+          departmentSelect.appendChild(option);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching CSV file:', error);
+      });
+
+    document.getElementById('studentForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      // Get the form data
+      var department = document.getElementById('departmentSelect').value;
+      var year = document.getElementById('yearSelect').value;
+      var name = document.getElementById('nameSelect').value;
+      var mentor = document.getElementById('mentorSelect').value;
+      var notes = document.getElementById('notesInput').value;
+
+      // Create an object with the form data
+      var formData = {
+        department: department,
+        year: year,
+        name: name,
+        mentor: mentor,
+        notes: notes
+      };
+      console.log("data",formData)
+
+      // Send the form data to the server-side script for processing
+      fetch('http://localhost:3000/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      })
+      .then(response => {
+        if (response.ok) {
+          console.log('Form data submitted successfully');
+          // Perform any desired actions upon successful form submission
+        } else {
+          console.error('Form data submission failed');
+          // Handle the error condition appropriately
+        }
+      })
+      .catch(error => {
+        console.error('Error submitting form data:', error);
+        // Handle any errors that occurred during form submission
+      });
+    });
+  </script>
+
+</body>
+</html>
+
