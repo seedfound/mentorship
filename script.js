@@ -1,51 +1,69 @@
-document.addEventListener('DOMContentLoaded', function() {
-  var teacherSelect = document.getElementById('teacherSelect');
-  var selectionForm = document.getElementById('selectionForm');
+const express = require('express');
+const fs = require('fs');
+const { google } = require('googleapis');
 
-  // Handle form submission
-  selectionForm.addEventListener('submit', function(event) {
-    event.preventDefault();
+const app = express();
 
-    // Get the selected teacher values
-    var selectedTeachers = Array.from(teacherSelect.selectedOptions, function(option) {
-      return option.value;
-    });
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-    // Get the inputted name
-    var nameInput = document.getElementById('nameInput');
-    var name = nameInput.value;
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
 
-    // Save the data to local storage
-    var data = {
-      name: name,
-      teachers: selectedTeachers
-    };
-    localStorage.setItem('selectionData', JSON.stringify(data));
+app.post('/submit', (req, res) => {
+  // Get the form data from the request body
+  const formData = req.body;
 
-    // Reset the form
-    nameInput.value = '';
-    teacherSelect.selectedIndex = -1;
-    alert('Selection saved successfully!');
-  });
+  // Load the credentials file
+  const credentials = require('./credentials.json'); // Replace with the path to your credentials file
 
-  // Load teacher data from Excel sheet
-  Papa.parse('teachers.csv', {
-    download: true,
-    complete: function(results) {
-      var teachers = results.data.map(function(row, index) {
-        return {
-          id: index + 1,
-          name: row[0]
-        };
-      });
+  // Configure the Google Sheets API client
+  const client = new google.auth.JWT(
+    credentials.client_email,
+    null,
+    credentials.private_key,
+    ['https://www.googleapis.com/auth/spreadsheets']
+  );
 
-      // Dynamically populate teacher select options
-      teachers.forEach(function(teacher) {
-        var option = document.createElement('option');
-        option.value = teacher.id;
-        option.textContent = teacher.name;
-        teacherSelect.appendChild(option);
-      });
+  // ID of the Google Sheet to append the data
+  const spreadsheetId = '17CtL3-jyJQJOpu38WB47PBg78QWS0ZfffppdDEJPA10'; // Replace with your Google Sheet ID
+
+  // Append the new form data to the Google Sheet
+  client.authorize((err) => {
+    if (err) {
+      console.error('Error authorizing Google Sheets API:', err);
+      res.sendStatus(500);
+      return;
     }
+
+    const sheets = google.sheets({ version: 'v4', auth: client });
+
+    sheets.spreadsheets.values.append(
+      {
+        spreadsheetId,
+        range: 'Sheet1', // Replace with your sheet name or range
+        valueInputOption: 'USER_ENTERED',
+        resource: {
+          values: [[formData.department, formData.year, formData.name, formData.mentor, formData.notes]],
+        },
+      },
+      (err, response) => {
+        if (err) {
+          console.error('Error appending data to Google Sheets:', err);
+          res.sendStatus(500);
+          return;
+        }
+
+        // Send a response indicating the form data was successfully saved
+        res.sendStatus(200);
+      }
+    );
   });
+});
+
+app.listen(3000, () => {
+  console.log('Server is running on port 3000');
 });
