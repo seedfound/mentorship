@@ -12,7 +12,9 @@
   <form id="studentForm" action="/submit" method="POST">
     <div>
         <label for="departmentSelect">Department:</label>
-        <select id="departmentSelect"></select>
+        <select id="departmentSelect" required>
+            <option value="" disabled selected>Select Department</option>
+        </select>
         <p>
 
         </p>
@@ -20,7 +22,8 @@
 
     <div>
       <label for="yearSelect">Year:</label>
-      <select id="yearSelect">
+      <select id="yearSelect" required>
+        <option value="" disabled selected>Select Year</option>
         <option value="year1">Year 1</option>
         <option value="year2">Year 2</option>
         <option value="year3">Year 3</option>
@@ -42,10 +45,11 @@
     <div>
     <div>
       <label for="mentorSelect">Mentor:</label>
-      <select id="mentorSelect">
-        <option value="Amala Rose">Amala Rose</option>
+      <select id="mentorSelect" required>
+        <option value="" disabled selected>Select Mentor</option>
         <option value="Sam">Sam</option>
-        <option value="Nizon">Nixon</option>
+        <option value="Amala Rose">Amala Rose</option>
+        <option value="Asha">Nixon</option>
       </select>
       <p>
             
@@ -135,6 +139,10 @@
         if (response.ok) {
           console.log('Form data submitted successfully');
           // Perform any desired actions upon successful form submission
+          alert('Data added successfully');
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
         } else {
           console.error('Form data submission failed');
           // Handle the error condition appropriately
