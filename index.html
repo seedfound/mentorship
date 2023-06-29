@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Student Information</title>
+  <title>Mentor Select Web Application by Seed Foundation</title>
   <link rel="stylesheet" type="text/css" href="styles.css">
   <script src="xlsx.full.min.js"></script>
 </head>
@@ -11,13 +11,11 @@
   <h3>Powered by Seed Foundation</h3>
   <form id="studentForm" action="/submit" method="POST">
     <div>
-        <label for="departmentSelect">Department:</label>
-        <select id="departmentSelect" required>
-            <option value="" disabled selected>Select Department</option>
-        </select>
-        <p>
-
-        </p>
+      <label for="departmentSelect">Department:</label>
+      <select id="departmentSelect" required>
+        <option value="" disabled selected>Select Department</option>
+      </select>
+      <p></p>
     </div>
 
     <div>
@@ -28,52 +26,38 @@
         <option value="year2">Year 2</option>
         <option value="year3">Year 3</option>
       </select>
-      <p>
-            
-      </p>
+      <p></p>
     </div>
 
     <div>
       <label for="nameSelect">Name:</label>
-        <textarea id="nameSelect"></textarea>
-      </select>
-      <p>
-            
-      </p>
+      <textarea id="nameSelect"></textarea>
+      <p></p>
     </div>
 
     <div>
-    <div>
-      <label for="mentorSelect">Mentor:</label>
-      <select id="mentorSelect" required>
-        <option value="" disabled selected>Select Mentor</option>
-        <option value="Sam">Sam</option>
-        <option value="Amala Rose">Amala Rose</option>
-        <option value="Asha">Nixon</option>
-      </select>
-      <p>
-            
-      </p>
-
-    </div>
-
+      <div>
+        <label for="mentorSelect">Mentor:</label>
+        <select id="mentorSelect" required>
+          <option value="" disabled selected>Select Mentor</option>
+        </select>
+        <p></p>
+      </div>
     </div>
 
     <div>
       <label for="notesInput">Notes:</label>
       <textarea id="notesInput"></textarea>
     </div>
-    <p>
-            
-    </p>
+    <p></p>
     <form id="studentForm" action="/submit" method="POST">
-
-        <input type="submit" value="Submit">
+      <input type="submit" value="Submit">
     </form>
   </form>
 
   <script>
     var csvFilePath = 'Dept.csv'; // Replace with your CSV file path
+    var mentorsCsvFilePath = 'Mentors.csv'; // Replace with the path to Mentors.csv
 
     fetch(csvFilePath)
       .then(response => response.text())
@@ -107,6 +91,38 @@
         console.error('Error fetching CSV file:', error);
       });
 
+    fetch(mentorsCsvFilePath)
+      .then(response => response.text())
+      .then(data => {
+        var lines = data.split('\n');
+        var jsonData = [];
+
+        for (var i = 1; i < lines.length; i++) {
+          var line = lines[i].split(',');
+          var mentor = line[0].trim();
+
+          if (mentor) {
+            jsonData.push(mentor);
+          }
+        }
+
+        var mentorSelect = document.getElementById('mentorSelect');
+
+        // Clear existing options
+        mentorSelect.innerHTML = '';
+
+        // Populate mentor dropdown with data from Mentors.csv
+        for (var i = 0; i < jsonData.length; i++) {
+          var option = document.createElement('option');
+          option.value = jsonData[i];
+          option.text = jsonData[i];
+          mentorSelect.appendChild(option);
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching Mentors CSV file:', error);
+      });
+
     document.getElementById('studentForm').addEventListener('submit', function(event) {
       event.preventDefault();
 
@@ -125,7 +141,7 @@
         mentor: mentor,
         notes: notes
       };
-      console.log("data",formData)
+      console.log("data", formData);
 
       // Send the form data to the server-side script for processing
       fetch('http://localhost:3000/submit', {
@@ -135,26 +151,25 @@
         },
         body: JSON.stringify(formData)
       })
-      .then(response => {
-        if (response.ok) {
-          console.log('Form data submitted successfully');
-          // Perform any desired actions upon successful form submission
-          alert('Data added successfully');
-          setTimeout(() => {
-            window.location.reload();
-          }, 1000);
-        } else {
-          console.error('Form data submission failed');
-          // Handle the error condition appropriately
-        }
-      })
-      .catch(error => {
-        console.error('Error submitting form data:', error);
-        // Handle any errors that occurred during form submission
-      });
+        .then(response => {
+          if (response.ok) {
+            console.log('Form data submitted successfully');
+            // Perform any desired actions upon successful form submission
+            alert('Data added successfully');
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          } else {
+            console.error('Form data submission failed');
+            // Handle the error condition appropriately
+          }
+        })
+        .catch(error => {
+          console.error('Error submitting form data:', error);
+          // Handle any errors that occurred during form submission
+        });
     });
   </script>
 
 </body>
 </html>
-
