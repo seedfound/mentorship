@@ -207,7 +207,7 @@
       console.log("data", formData);
 
       // Send the form data to the server-side script for processing
-      fetch('/submit', {
+      fetch('http://localhost:3000/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
